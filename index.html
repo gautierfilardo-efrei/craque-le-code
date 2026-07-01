@@ -21,7 +21,7 @@
   body{
     margin:0; background:var(--ink); color:var(--text);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; overflow:hidden; transition:background .8s ease;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; overflow-y:auto; transition:background .8s ease;
   }
   body.quantum{ --accent:var(--q1); --accent-soft:rgba(124,92,255,.16); --glow:rgba(124,92,255,.5); background:#070512; }
   .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
@@ -39,7 +39,7 @@
   }
   @keyframes scan{0%{top:-120px}100%{top:100%}}
 
-  .wrap{position:relative; z-index:1; height:100%; display:flex; flex-direction:column;
+  .wrap{position:relative; z-index:1; min-height:100%; display:flex; flex-direction:column;
         max-width:1120px; margin:0 auto; padding:clamp(12px,2.2vh,24px) clamp(16px,4vw,44px);}
 
   header{display:flex; align-items:center; justify-content:space-between; gap:14px; flex:0 0 auto}
@@ -155,6 +155,27 @@
   .lattice .lbl-bg{fill:var(--panel); stroke:var(--line); stroke-width:1}
   .lattice .lbl{fill:var(--text); font-weight:600; font-size:12px}
   .lattice marker path{fill:var(--accent)}
+  .dimwrap{display:flex; flex-direction:column; align-items:center; gap:12px; width:100%}
+  .dim-svg{width:min(400px,90%); max-height:34vh; height:auto}
+  .dim-svg marker path{fill:var(--accent)}
+  .dim-svg .dot{fill:var(--muted)}
+  .dim-svg .edge{stroke:var(--line); stroke-width:1.2}
+  .dim-svg .ray{stroke:var(--line); stroke-width:1}
+  .dim-svg .secret{fill:var(--accent); filter:drop-shadow(0 0 8px var(--glow))}
+  .dim-svg .pub{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:3 3}
+  .dim-svg .arrow{stroke:var(--accent); stroke-width:2}
+  .dim-svg .lbl-bg{fill:var(--panel); stroke:var(--line); stroke-width:1}
+  .dim-svg .lbl{fill:var(--text); font-weight:700; font-size:12px}
+  .dim-svg .bigd{fill:var(--accent); font-weight:800; font-size:52px; text-anchor:middle}
+  .dim-svg .bigsub{fill:var(--muted); font-weight:700; font-size:13px; text-anchor:middle}
+  .dim-svg .spin{transform-origin:200px 118px; animation:wob 4.5s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+  .dim-svg .tw{animation:tw 2.4s ease-in-out infinite}
+  @keyframes tw{50%{opacity:.2}}
+  .dim-meter{width:min(520px,92%)}
+  .dim-count{font-weight:700; font-size:clamp(14px,2.3vw,20px); text-align:center; margin-bottom:8px; line-height:1.35}
+  .dim-count b{color:var(--accent)}
+  .dim-count .uni{color:var(--danger); font-weight:700; display:block; font-size:.8em; margin-top:3px}
 
   .stamp{font-weight:800; letter-spacing:.16em; text-transform:uppercase; font-size:clamp(18px,3.2vw,28px);
          padding:12px 26px; border-radius:12px; display:inline-block;}
@@ -169,8 +190,6 @@
   @media (max-width:640px){
     .eyebrow{display:none}
     .hint{display:none}
-    body{overflow-y:auto; overflow-x:hidden}
-    .wrap{height:auto; min-height:100%}
     footer{padding-top:14px}
   }
   @media (max-width:520px){ :root{--stage-h:42vh} .qgrid{grid-template-columns:repeat(12,1fr); width:min(300px,88%)} }
@@ -305,14 +324,21 @@
     <section class="step" data-step="5">
       <div class="kicker">Étape 5 · Post-quantique</div>
       <h2>Les réseaux</h2>
-      <p class="lead">Le cadenas de demain repose sur une grille de points.</p>
+      <p class="lead">Le cadenas de demain repose sur une grille de points. Fais grandir la dimension.</p>
       <div class="stage">
-        <svg id="lattice" class="lattice" viewBox="0 0 400 260" aria-label="réseau de points (lattice)">
-          <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-            <path d="M0,0 L9,4.5 L0,9 Z"/></marker></defs>
-          <g id="lat-g"></g>
-        </svg>
-        <p class="note">Je cache un secret : je pars d'un point de la grille et j'ajoute un petit bruit. Retrouver le point le plus proche est facile ici, en 2D… mais devient <b>impossible</b> en plusieurs centaines de dimensions — même pour un ordinateur quantique. C'est l'idée des standards choisis en 2024.</p>
+        <div class="dimwrap">
+          <div class="sizes" id="dimBtns"></div>
+          <svg id="dimsvg" class="dim-svg" viewBox="0 0 400 250" aria-label="réseau en N dimensions">
+            <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 Z"/></marker></defs>
+            <g id="dim-g"></g>
+          </svg>
+          <div class="dim-meter">
+            <div class="dim-count" id="dimCount"></div>
+            <div class="track"><div class="fill" id="dimFill"></div></div>
+          </div>
+        </div>
+        <p class="note" id="dimNote">Je cache un secret : je pars d'un point de la grille et j'ajoute un petit bruit. Retrouver le point le plus proche est facile en 2D… mais le nombre de possibilités <b>explose</b> avec la dimension. En quelques centaines de dimensions, c'est impossible — même pour un ordinateur quantique. C'est l'idée des standards de 2024.</p>
       </div>
     </section>
 
@@ -454,24 +480,74 @@ function activateQuantum(){
 document.getElementById('qbtn').addEventListener('click',activateQuantum);
 
 /* 5 : lattice */
-function runLattice(){
-  const g=document.getElementById('lat-g'); g.innerHTML='';
-  const O={x:66,y:150}, b1={x:46,y:9}, b2={x:15,y:-38};
+/* 5 : réseaux — schéma dynamique en N dimensions */
+const DIMS=[2,3,10,100,512];
+let dimBuilt=false;
+const _c=(g,x,y,r,cls,st)=>{const e=document.createElementNS(NS,'circle');e.setAttribute('cx',x);e.setAttribute('cy',y);e.setAttribute('r',r);e.setAttribute('class',cls);if(st)e.setAttribute('style',st);g.appendChild(e);return e;};
+const _l=(g,x1,y1,x2,y2,cls)=>{const e=document.createElementNS(NS,'line');e.setAttribute('x1',x1);e.setAttribute('y1',y1);e.setAttribute('x2',x2);e.setAttribute('y2',y2);e.setAttribute('class',cls);g.appendChild(e);return e;};
+const _t=(g,x,y,t,cls)=>{const e=document.createElementNS(NS,'text');e.setAttribute('x',x);e.setAttribute('y',y);e.setAttribute('class',cls);e.textContent=t;g.appendChild(e);return e;};
+function _label(g,x,y,t){const w=t.length*6.5+14;const bg=document.createElementNS(NS,'rect');bg.setAttribute('x',x-w/2);bg.setAttribute('y',y-13);bg.setAttribute('width',w);bg.setAttribute('height',19);bg.setAttribute('rx',6);bg.setAttribute('class','lbl-bg');g.appendChild(bg);_t(g,x,y+2,t,'lbl').setAttribute('text-anchor','middle');}
+
+function draw2D(g){
+  const O={x:70,y:150}, b1={x:46,y:9}, b2={x:15,y:-38};
   const pt=(i,j)=>({x:O.x+i*b1.x+j*b2.x, y:O.y+i*b1.y+j*b2.y});
-  const circle=(x,y,r,cls)=>{const c=document.createElementNS(NS,'circle');
-    c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',r);c.setAttribute('class',cls);g.appendChild(c);return c;};
-  const line=(x1,y1,x2,y2,cls)=>{const l=document.createElementNS(NS,'line');
-    l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
-    l.setAttribute('class',cls);g.appendChild(l);return l;};
-  const label=(x,y,t)=>{const w=t.length*6.5+14;const bg=document.createElementNS(NS,'rect');bg.setAttribute('x',x-w/2);bg.setAttribute('y',y-13);bg.setAttribute('width',w);bg.setAttribute('height',19);bg.setAttribute('rx',6);bg.setAttribute('class','lbl-bg');g.appendChild(bg);const e=document.createElementNS(NS,'text');e.setAttribute('x',x);e.setAttribute('y',y+2);e.setAttribute('text-anchor','middle');e.setAttribute('class','lbl');e.textContent=t;g.appendChild(e);};
-  for(let i=0;i<7;i++)for(let j=0;j<6;j++){ const p=pt(i,j);
-    if(p.x<14||p.x>388||p.y<16||p.y>248) continue; circle(p.x,p.y,3.4,'dot'); }
-  const p1=pt(1,0), p2=pt(0,1);
-  line(O.x,O.y,p1.x,p1.y,'basis'); line(O.x,O.y,p2.x,p2.y,'basis');
+  for(let i=0;i<7;i++)for(let j=0;j<6;j++){const p=pt(i,j); if(p.x<14||p.x>388||p.y<14||p.y>238) continue; _c(g,p.x,p.y,3.4,'dot');}
+  _l(g,O.x,O.y,pt(1,0).x,pt(1,0).y,'ray'); _l(g,O.x,O.y,pt(0,1).x,pt(0,1).y,'ray');
   const s=pt(3,2), pub={x:s.x+16,y:s.y+12};
-  const a=line(pub.x,pub.y,s.x,s.y,'arrow'); a.setAttribute('marker-end','url(#ah)');
-  circle(s.x,s.y,6,'secret'); circle(pub.x,pub.y,6,'pub');
-  label(s.x,s.y-16,'point secret'); label(pub.x,pub.y+24,'public = secret + bruit');
+  _l(g,pub.x,pub.y,s.x,s.y,'arrow').setAttribute('marker-end','url(#ah)');
+  _c(g,s.x,s.y,6,'secret'); _c(g,pub.x,pub.y,6,'pub');
+  _label(g,s.x,s.y-16,'point secret'); _label(g,pub.x,pub.y+24,'public = secret + bruit');
+}
+function draw3D(g){
+  const wrap=document.createElementNS(NS,'g'); wrap.setAttribute('class','spin'); g.appendChild(wrap);
+  const C={x:200,y:118}, vi={x:30,y:16}, vj={x:0,y:-34}, vk={x:-30,y:16};
+  const P=(i,j,k)=>({x:C.x+(i-1)*vi.x+(j-1)*vj.x+(k-1)*vk.x, y:C.y+(i-1)*vi.y+(j-1)*vj.y+(k-1)*vk.y});
+  const key=(a,b,c)=>a+','+b+','+c, seen={};
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++)for(let k=0;k<3;k++){
+    [[i+1,j,k],[i,j+1,k],[i,j,k+1]].forEach(n=>{ if(n[0]<3&&n[1]<3&&n[2]<3){
+      const A=P(i,j,k),B=P(n[0],n[1],n[2]); _l(wrap,A.x,A.y,B.x,B.y,'edge'); }});
+  }
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++)for(let k=0;k<3;k++){const p=P(i,j,k); _c(wrap,p.x,p.y,3.6,'dot');}
+  _label(g,200,232,'3 dimensions — encore visible');
+}
+function drawND(g,N){
+  const C={x:200,y:104};
+  for(let k=0;k<44;k++){
+    const ang=k*2.399, rad=58+(k%11)*7.0;
+    const x=C.x+Math.cos(ang)*rad, y=C.y+Math.sin(ang)*rad*0.72;
+    if(k%5===0) _l(g,C.x,C.y,x,y,'ray');
+    const d=_c(g,x,y,2.4,'dot tw'); d.setAttribute('style','animation-delay:'+(k*0.09)+'s');
+  }
+  _t(g,200,120,N+' D','bigd');
+  _t(g,200,150,'impossible à dessiner','bigsub');
+  _label(g,200,232,'on ne peut plus « voir » le plus proche');
+}
+function fmtPoss(N){
+  const log10=N*Math.log10(3), digits=Math.floor(log10)+1;
+  let html;
+  if(N<=3) html='<b>'+Math.round(Math.pow(3,N))+'</b> possibilités à tester';
+  else if(digits<7) html='≈ <b>'+Math.round(Math.pow(3,N)).toLocaleString('fr-FR')+'</b> possibilités à tester';
+  else { const m=Math.pow(10,log10-Math.floor(log10));
+    html='≈ <b>'+m.toFixed(1)+' × 10<sup>'+(digits-1)+'</sup></b> possibilités ('+digits+' chiffres)'; }
+  const uni = digits>80 ? '<span class="uni">plus que le nombre d’atomes dans l’univers (~10<sup>80</sup>)</span>' : '';
+  return {html:html+uni, pct:Math.min(100, digits/70*100), max:digits>=48};
+}
+function renderDim(N){
+  const g=document.getElementById('dim-g'); g.innerHTML='';
+  if(N===2) draw2D(g); else if(N===3) draw3D(g); else drawND(g,N);
+  const f=fmtPoss(N);
+  document.getElementById('dimCount').innerHTML='Points à explorer pour retrouver le secret : '+f.html;
+  const fill=document.getElementById('dimFill'); fill.style.width=f.pct+'%'; fill.classList.toggle('max',f.max);
+  [...document.getElementById('dimBtns').children].forEach(b=>b.classList.toggle('on', +b.dataset.n===N));
+}
+function runLattice(){
+  const box=document.getElementById('dimBtns');
+  if(!dimBuilt){
+    DIMS.forEach(n=>{ const b=document.createElement('button'); b.className='chip'; b.dataset.n=n;
+      b.textContent=n+'D'; b.addEventListener('click',()=>renderDim(n)); box.appendChild(b); });
+    dimBuilt=true;
+  }
+  renderDim(2);
 }
 
 /* 6 : post-quantique */
